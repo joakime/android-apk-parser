@@ -1,15 +1,13 @@
-package net.erdfelt.android.apk;
+package net.erdfelt.android.apk.xml;
 
 import java.io.IOException;
-
-import org.apache.commons.io.input.SwappedDataInputStream;
 
 public class Attribute {
     private static final int TYPE_STRING = 0x03000008;
     private static final int TYPE_ID_REF = 0x01000008;
     private static final int TYPE_INT    = 0x10000008;
 
-    private String           namespaceUri;
+    private Namespace        namespace;
     private String           name;
     private String           value;
 
@@ -19,48 +17,38 @@ public class Attribute {
         this.value = value;
     }
 
-    public Attribute(SwappedDataInputStream le, StringsChunk strings) throws IOException {
+    public Attribute(BinaryXmlInputStream le) throws IOException {
         // Attribute layout
         // word0 : namespace Uri index
         // word1 : name index
         // word2 : value string index
         // word3 : value type
         // word4 : value data
-        int nsUriIndex = le.readInt();
-        int nameIndex = le.readInt();
-        int valueIndex = le.readInt();
+        this.namespace = le.readNamespaceRef();
+        this.name = le.readStringRef();
+        this.value = le.readStringRef();
         int valueType = le.readInt();
         int valueData = le.readInt();
 
-        this.namespaceUri = strings.getString(nsUriIndex);
-        this.name = strings.getString(nameIndex);
-        this.value = strings.getString(valueIndex);
-
         switch (valueType) {
             case TYPE_STRING:
-                this.value = strings.getString(valueData);
+                this.value = le.getString(valueData);
                 break;
             case TYPE_INT:
                 this.value = Integer.toString(valueData);
                 break;
             case TYPE_ID_REF:
-                this.value = "@id/" + Integer.toString(valueData);
+                this.value = String.format("@id/0x%08X", valueData);
                 break;
             default:
-                this.value= String.format("(0x%08X/0x%08X)", valueType, valueData);
+                this.value = String.format("(0x%08X/0x%08X)", valueType, valueData);
                 break;
         }
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        if (namespaceUri != null) {
-            sb.append(namespaceUri).append(':');
-        }
-        sb.append(name);
-        sb.append("=\"").append(value).append("\"");
-        return sb.toString();
+        return String.format("%s%s=\"%s\"", namespace, name, value);
     }
 
     public String getName() {

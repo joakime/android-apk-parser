@@ -22,7 +22,7 @@ public class AndroidApkTest {
         File apkfile = MavenTestingUtils.getTestResourceFile("abi-13.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
-        Assert.assertEquals("apk.appVersion", "1.3-SNAPSHOT", apk.getAppVersion());
+        Assert.assertEquals("apk.appVersion", "1.3", apk.getAppVersion());
     }
 
     @Test
@@ -30,6 +30,31 @@ public class AndroidApkTest {
         File apkfile = MavenTestingUtils.getTestResourceFile("abi-13.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
-        Assert.assertEquals("apk.appVersionCode", "13", apk.getAppVersionCode());
+        Assert.assertEquals("apk.appVersionCode", "4", apk.getAppVersionCode());
     }
+
+    @Test
+    public void testGestureFunPackageName() throws ZipException, IOException {
+        File apkfile = MavenTestingUtils.getTestResourceFile("agf-10.apk");
+        AndroidApk apk = new AndroidApk(apkfile);
+
+        Assert.assertEquals("apk.packageName", "com.erdfelt.android.gestures", apk.getPackageName());
+    }
+
+    @Test
+    public void testGestureFunAppVersion() throws ZipException, IOException {
+        File apkfile = MavenTestingUtils.getTestResourceFile("agf-10.apk");
+        AndroidApk apk = new AndroidApk(apkfile);
+
+        Assert.assertEquals("apk.appVersion", "1.0", apk.getAppVersion());
+    }
+
+    @Test
+    public void testGestureFunAppVersionCode() throws ZipException, IOException {
+        File apkfile = MavenTestingUtils.getTestResourceFile("agf-10.apk");
+        AndroidApk apk = new AndroidApk(apkfile);
+
+        Assert.assertEquals("apk.appVersionCode", "1", apk.getAppVersionCode());
+    }
+
 }
