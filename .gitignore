@@ -1,0 +1,7 @@
+/target
+/bin
+/gen
+/.classpath
+/.project
+/.settings
+*.swp
