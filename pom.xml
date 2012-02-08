@@ -26,6 +26,9 @@
     <developerConnection>scm:git:git@github.com:joakime/android-apk-parser.git</developerConnection>
     <url>git@github.com:joakime/android-apk-parser.git</url>
   </scm>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
