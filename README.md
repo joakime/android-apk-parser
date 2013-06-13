@@ -17,9 +17,9 @@ A SNAPSHOT of the library has been deployed to oss.sonatype.org under
 the following `dependency`.
 
     <dependency>
-      <groupId>net.erdfelt.android.apk</groupId>
+      <groupId>net.erdfelt.android</groupId>
       <artifactId>apk-parser</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
 
 Once you have that dependency (no other transitive dependencies required)
