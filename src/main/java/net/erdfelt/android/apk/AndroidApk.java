@@ -46,6 +46,13 @@ public class AndroidApk {
             parser.parse(in);
         } finally {
             IO.close(in);
+            try {
+                if(zip != null) {
+                    zip.close();
+                }
+            } catch(IOException ignore) {
+                /* ignore */
+            }
         }
     }
 
