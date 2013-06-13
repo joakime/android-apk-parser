@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.erdfelt.android</groupId>
   <artifactId>apk-parser</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
   <name>Android APK Parser</name>
   <description>Parser for android app *.apk files</description>
   <url>https://github.com/joakime/android-apk-parser</url>
