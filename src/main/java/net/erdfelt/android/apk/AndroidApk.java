@@ -16,7 +16,10 @@ public class AndroidApk {
     private String appVersion;
     private String appVersionCode;
     private String packageName;
-
+    private String minSdkVersion;
+    private String targetSdkVersion;
+    private String maxSdkVersion;
+	
     private class ManifestListener implements BinaryXmlListener {
         public void onXmlEntry(String path, String name, Attribute... attrs) {
             if ("//".equals(path) && "manifest".equals(name)) {
@@ -29,6 +32,22 @@ public class AndroidApk {
                         appVersionCode = attrib.getValue();
                     }
                 }
+            }
+			
+			if ("uses-sdk".equals(name)) {
+				for (Attribute attrib : attrs) {
+					if ("minSdkVersion".equals(attrib.getName())) {
+						minSdkVersion = attrib.getValue();
+					}
+					
+					if ("targetSdkVersion".equals(attrib.getName())) {
+						targetSdkVersion = attrib.getValue();
+					}
+					
+					if ("maxSdkVersion".equals(attrib.getName())) {
+						maxSdkVersion = attrib.getValue();
+					}
+				}
             }
         }
     }
@@ -67,4 +86,17 @@ public class AndroidApk {
     public String getPackageName() {
         return packageName;
     }
+	
+	public String getMinSdkVersion() {
+		return minSdkVersion;
+	}
+	
+	public String getTargetSdkVersion() {
+		return targetSdkVersion;
+	}
+	
+	public String getMaxSdkVersion() {
+		return maxSdkVersion;
+	}
+	
 }
