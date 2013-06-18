@@ -38,13 +38,9 @@ public class AndroidApk {
 				for (Attribute attrib : attrs) {
 					if ("minSdkVersion".equals(attrib.getName())) {
 						minSdkVersion = attrib.getValue();
-					}
-					
-					if ("targetSdkVersion".equals(attrib.getName())) {
+					} else if ("targetSdkVersion".equals(attrib.getName())) {
 						targetSdkVersion = attrib.getValue();
-					}
-					
-					if ("maxSdkVersion".equals(attrib.getName())) {
+					} else if ("maxSdkVersion".equals(attrib.getName())) {
 						maxSdkVersion = attrib.getValue();
 					}
 				}
