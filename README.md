@@ -19,7 +19,7 @@ the following `dependency`.
     <dependency>
       <groupId>net.erdfelt.android</groupId>
       <artifactId>apk-parser</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2</version>
     </dependency>
 
 Once you have that dependency (no other transitive dependencies required)
