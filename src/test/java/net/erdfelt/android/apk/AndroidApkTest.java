@@ -1,16 +1,16 @@
 package net.erdfelt.android.apk;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.zip.ZipException;
-
 import org.eclipse.jetty.toolchain.test.MavenTestingUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 public class AndroidApkTest {
     @Test
-    public void testBuildInfoPackageName() throws ZipException, IOException {
+    public void testBuildInfoPackageName() throws IOException {
         File apkfile = MavenTestingUtils.getTestResourceFile("abi-13.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
@@ -18,7 +18,7 @@ public class AndroidApkTest {
     }
 
     @Test
-    public void testBuildInfoAppVersion() throws ZipException, IOException {
+    public void testBuildInfoAppVersion() throws IOException {
         File apkfile = MavenTestingUtils.getTestResourceFile("abi-13.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
@@ -26,7 +26,7 @@ public class AndroidApkTest {
     }
 
     @Test
-    public void testBuildInfoMinSdkVersion() throws ZipException, IOException {
+    public void testBuildInfoMinSdkVersion() throws IOException {
         File apkfile = MavenTestingUtils.getTestResourceFile("abi-13.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
@@ -34,7 +34,7 @@ public class AndroidApkTest {
     }
 
     @Test
-    public void testBuildInfoAppVersionCode() throws ZipException, IOException {
+    public void testBuildInfoAppVersionCode() throws IOException {
         File apkfile = MavenTestingUtils.getTestResourceFile("abi-13.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
@@ -42,7 +42,7 @@ public class AndroidApkTest {
     }
 
     @Test
-    public void testGestureFunPackageName() throws ZipException, IOException {
+    public void testGestureFunPackageName() throws IOException {
         File apkfile = MavenTestingUtils.getTestResourceFile("agf-10.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
@@ -50,7 +50,7 @@ public class AndroidApkTest {
     }
 
     @Test
-    public void testGestureFunMinSdkVersion() throws ZipException, IOException {
+    public void testGestureFunMinSdkVersion() throws IOException {
         File apkfile = MavenTestingUtils.getTestResourceFile("agf-10.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
@@ -58,7 +58,7 @@ public class AndroidApkTest {
     }
 
     @Test
-    public void testGestureFunAppVersion() throws ZipException, IOException {
+    public void testGestureFunAppVersion() throws IOException {
         File apkfile = MavenTestingUtils.getTestResourceFile("agf-10.apk");
         AndroidApk apk = new AndroidApk(apkfile);
 
@@ -66,9 +66,17 @@ public class AndroidApkTest {
     }
 
     @Test
-    public void testGestureFunAppVersionCode() throws ZipException, IOException {
+    public void testGestureFunAppVersionCode() throws IOException {
         File apkfile = MavenTestingUtils.getTestResourceFile("agf-10.apk");
         AndroidApk apk = new AndroidApk(apkfile);
+
+        Assert.assertEquals("apk.appVersionCode", "1", apk.getAppVersionCode());
+    }
+
+    @Test
+    public void testReadFromStream() throws IOException {
+        File apkfile = MavenTestingUtils.getTestResourceFile("agf-10.apk");
+        AndroidApk apk = new AndroidApk(new FileInputStream(apkfile));
 
         Assert.assertEquals("apk.appVersionCode", "1", apk.getAppVersionCode());
     }
