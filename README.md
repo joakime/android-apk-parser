@@ -1,15 +1,16 @@
 Android APK Parsing Lib
 =======================
 
-Simple class to read/parse the packageName, versionName, & versionCode
-information out of a compiled Android APK file.
+Simple class to read/parse the packageName, versionName, versionCode
+information, and more out of a compiled Android APK file.
 
 This is accomplished by decompressing the AndroidManifest.xml file and
 then decoding the compiled XML binary file to glean this information.
 
 I've been using this for some automatic versioning of various android
-artifacts I have.  I am sharing this codebase under the Apache Source
-License 2.0 in hopes that others will find it useful (or educational).
+artifacts I have.  I am sharing this codebase under the [Apache Source
+License 2.0](https://github.com/joakime/android-apk-parser/blob/master/LICENSE-2.0.txt)
+in hopes that others will find it useful (or educational).
 
 ## Usage ##
 
@@ -19,7 +20,7 @@ the following `dependency`.
     <dependency>
       <groupId>net.erdfelt.android</groupId>
       <artifactId>apk-parser</artifactId>
-      <version>1.0.2</version>
+      <version>1.1</version>
     </dependency>
 
 Once you have that dependency (no other transitive dependencies required)
