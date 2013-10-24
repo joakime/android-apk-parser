@@ -1,16 +1,18 @@
 package net.erdfelt.android.apk;
 
+import net.erdfelt.android.apk.io.IO;
+import net.erdfelt.android.apk.xml.Attribute;
+import net.erdfelt.android.apk.xml.BinaryXmlListener;
+import net.erdfelt.android.apk.xml.BinaryXmlParser;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
-
-import net.erdfelt.android.apk.io.IO;
-import net.erdfelt.android.apk.xml.Attribute;
-import net.erdfelt.android.apk.xml.BinaryXmlListener;
-import net.erdfelt.android.apk.xml.BinaryXmlParser;
+import java.util.zip.ZipInputStream;
 
 public class AndroidApk {
     private String appVersion;
@@ -51,14 +53,14 @@ public class AndroidApk {
     public AndroidApk(File apkfile) throws ZipException, IOException {
         ZipFile zip = new ZipFile(apkfile);
         ZipEntry manifestEntry = zip.getEntry("AndroidManifest.xml");
+        if (manifestEntry == null) {
+            throw new FileNotFoundException("Cannot find AndroidManifest.xml in apk");
+        }
 
         InputStream in = null;
         try {
             in = zip.getInputStream(manifestEntry);
-            BinaryXmlParser parser = new BinaryXmlParser();
-            // parser.addListener(new BinaryXmlDump());
-            parser.addListener(new ManifestListener());
-            parser.parse(in);
+            parseStream(in);
         } finally {
             IO.close(in);
             try {
@@ -69,6 +71,38 @@ public class AndroidApk {
                 /* ignore */
             }
         }
+    }
+
+    /**
+     * Takes as an input APK as a stream. At the end, the stream is closed.
+     * @param apkfileInputStream apk file stream
+     * @throws IOException in case of error of reading/parsing data
+     */
+    public AndroidApk(InputStream apkfileInputStream) throws IOException {
+        InputStream in = null;
+        try {
+            final ZipInputStream is = new ZipInputStream(apkfileInputStream);
+            ZipEntry ze;
+            while (((ze = is.getNextEntry()) != null) && !ze.getName().endsWith("AndroidManifest.xml")) {
+                //continue
+            }
+            in = is;
+            if (ze == null) {
+                throw new FileNotFoundException("Cannot find AndroidManifest.xml in apk");
+            }
+
+            parseStream(in);
+        } finally {
+            IO.close(in);
+        }
+    }
+
+
+    private void parseStream(InputStream in) throws IOException {
+        BinaryXmlParser parser = new BinaryXmlParser();
+        // parser.addListener(new BinaryXmlDump());
+        parser.addListener(new ManifestListener());
+        parser.parse(in);
     }
 
     public String getAppVersion() {
