@@ -51,14 +51,15 @@ public class AndroidApk {
     }
 
     public AndroidApk(File apkfile) throws ZipException, IOException {
-        ZipFile zip = new ZipFile(apkfile);
-        ZipEntry manifestEntry = zip.getEntry("AndroidManifest.xml");
-        if (manifestEntry == null) {
-            throw new FileNotFoundException("Cannot find AndroidManifest.xml in apk");
-        }
-
+        ZipFile zip = null;
         InputStream in = null;
         try {
+            zip = new ZipFile(apkfile);
+            ZipEntry manifestEntry = zip.getEntry("AndroidManifest.xml");
+            if (manifestEntry == null) {
+                throw new FileNotFoundException("Cannot find AndroidManifest.xml in apk");
+            }
+
             in = zip.getInputStream(manifestEntry);
             parseStream(in);
         } finally {
