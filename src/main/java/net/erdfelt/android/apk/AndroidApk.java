@@ -21,7 +21,7 @@ public class AndroidApk {
     private String minSdkVersion;
     private String targetSdkVersion;
     private String maxSdkVersion;
-	
+
     private class ManifestListener implements BinaryXmlListener {
         public void onXmlEntry(String path, String name, Attribute... attrs) {
             if ("//".equals(path) && "manifest".equals(name)) {
@@ -35,17 +35,17 @@ public class AndroidApk {
                     }
                 }
             }
-			
-			if ("uses-sdk".equals(name)) {
-				for (Attribute attrib : attrs) {
-					if ("minSdkVersion".equals(attrib.getName())) {
-						minSdkVersion = attrib.getValue();
-					} else if ("targetSdkVersion".equals(attrib.getName())) {
-						targetSdkVersion = attrib.getValue();
-					} else if ("maxSdkVersion".equals(attrib.getName())) {
-						maxSdkVersion = attrib.getValue();
-					}
-				}
+
+            if ("uses-sdk".equals(name)) {
+                for (Attribute attrib : attrs) {
+                    if ("minSdkVersion".equals(attrib.getName())) {
+                        minSdkVersion = attrib.getValue();
+                    } else if ("targetSdkVersion".equals(attrib.getName())) {
+                        targetSdkVersion = attrib.getValue();
+                    } else if ("maxSdkVersion".equals(attrib.getName())) {
+                        maxSdkVersion = attrib.getValue();
+                    }
+                }
             }
         }
     }
@@ -64,10 +64,10 @@ public class AndroidApk {
         } finally {
             IO.close(in);
             try {
-                if(zip != null) {
+                if (zip != null) {
                     zip.close();
                 }
-            } catch(IOException ignore) {
+            } catch (IOException ignore) {
                 /* ignore */
             }
         }
@@ -75,8 +75,11 @@ public class AndroidApk {
 
     /**
      * Takes as an input APK as a stream. At the end, the stream is closed.
-     * @param apkfileInputStream apk file stream
-     * @throws IOException in case of error of reading/parsing data
+     * 
+     * @param apkfileInputStream
+     *            apk file stream
+     * @throws IOException
+     *             in case of error of reading/parsing data
      */
     public AndroidApk(InputStream apkfileInputStream) throws IOException {
         InputStream in = null;
@@ -84,7 +87,7 @@ public class AndroidApk {
             final ZipInputStream is = new ZipInputStream(apkfileInputStream);
             ZipEntry ze;
             while (((ze = is.getNextEntry()) != null) && !ze.getName().endsWith("AndroidManifest.xml")) {
-                //continue
+                // continue
             }
             in = is;
             if (ze == null) {
@@ -96,7 +99,6 @@ public class AndroidApk {
             IO.close(in);
         }
     }
-
 
     private void parseStream(InputStream in) throws IOException {
         BinaryXmlParser parser = new BinaryXmlParser();
@@ -116,17 +118,17 @@ public class AndroidApk {
     public String getPackageName() {
         return packageName;
     }
-	
-	public String getMinSdkVersion() {
-		return minSdkVersion;
-	}
-	
-	public String getTargetSdkVersion() {
-		return targetSdkVersion;
-	}
-	
-	public String getMaxSdkVersion() {
-		return maxSdkVersion;
-	}
-	
+
+    public String getMinSdkVersion() {
+        return minSdkVersion;
+    }
+
+    public String getTargetSdkVersion() {
+        return targetSdkVersion;
+    }
+
+    public String getMaxSdkVersion() {
+        return maxSdkVersion;
+    }
+
 }
