@@ -1,27 +1,31 @@
 package net.erdfelt.android.apk;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
+
 import net.erdfelt.android.apk.io.IO;
 import net.erdfelt.android.apk.xml.Attribute;
 import net.erdfelt.android.apk.xml.BinaryXmlListener;
 import net.erdfelt.android.apk.xml.BinaryXmlParser;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-
 public class AndroidApk {
+    private static final Logger LOG = Logger.getLogger(AndroidApk.class.getName());
+    
     private String appVersion;
     private String appVersionCode;
     private String packageName;
     private String minSdkVersion;
     private String targetSdkVersion;
     private String maxSdkVersion;
-
+    
     private class ManifestListener implements BinaryXmlListener {
         public void onXmlEntry(String path, String name, Attribute... attrs) {
             if ("//".equals(path) && "manifest".equals(name)) {
@@ -49,28 +53,14 @@ public class AndroidApk {
             }
         }
     }
-
+    
     public AndroidApk(File apkfile) throws ZipException, IOException {
-        ZipFile zip = null;
         InputStream in = null;
         try {
-            zip = new ZipFile(apkfile);
-            ZipEntry manifestEntry = zip.getEntry("AndroidManifest.xml");
-            if (manifestEntry == null) {
-                throw new FileNotFoundException("Cannot find AndroidManifest.xml in apk");
-            }
-
-            in = zip.getInputStream(manifestEntry);
-            parseStream(in);
+            in = new FileInputStream(apkfile);
+            readZip(in);
         } finally {
             IO.close(in);
-            try {
-                if (zip != null) {
-                    zip.close();
-                }
-            } catch (IOException ignore) {
-                /* ignore */
-            }
         }
     }
 
@@ -83,28 +73,49 @@ public class AndroidApk {
      *             in case of error of reading/parsing data
      */
     public AndroidApk(InputStream apkfileInputStream) throws IOException {
-        InputStream in = null;
+        readZip(apkfileInputStream);
+    }
+
+    private void readZip(InputStream in) throws IOException, FileNotFoundException {
+        ZipInputStream zis = null;
+        
         try {
-            final ZipInputStream is = new ZipInputStream(apkfileInputStream);
+            zis = new ZipInputStream(in);
+            
+            boolean foundManifest = false;
             ZipEntry ze;
-            while (((ze = is.getNextEntry()) != null) && !ze.getName().endsWith("AndroidManifest.xml")) {
-                // continue
+            while (((ze = zis.getNextEntry()) != null))
+            {
+                String name = ze.getName();
+                debug("Entry: %s",name);
+                if(name.equalsIgnoreCase("AndroidManifest.xml"))
+                {
+                    foundManifest = true;
+                    parseXmlEntry(ze, zis, new ManifestListener());
+                } else if(name.equalsIgnoreCase("resources.arsc"))
+                {
+                    // TODO parseArscEntry(ze, zis, new ResourceListener());
+                }
             }
-            in = is;
-            if (ze == null) {
+            
+            if (!foundManifest) {
                 throw new FileNotFoundException("Cannot find AndroidManifest.xml in apk");
             }
-
-            parseStream(in);
         } finally {
-            IO.close(in);
+            IO.close(zis);
         }
     }
 
-    private void parseStream(InputStream in) throws IOException {
+    private void debug(String format, Object ... args) {
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.fine(String.format(format, args));
+        }
+    }
+
+    private void parseXmlEntry(ZipEntry ze, InputStream in, BinaryXmlListener listener) throws IOException {
         BinaryXmlParser parser = new BinaryXmlParser();
         // parser.addListener(new BinaryXmlDump());
-        parser.addListener(new ManifestListener());
+        parser.addListener(listener);
         parser.parse(in);
     }
 
