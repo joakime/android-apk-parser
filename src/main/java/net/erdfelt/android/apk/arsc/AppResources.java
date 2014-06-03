@@ -4,30 +4,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.erdfelt.android.apk.io.IO;
 import net.erdfelt.android.apk.io.ParseException;
+import net.erdfelt.android.apk.util.Dumpable;
+import net.erdfelt.android.apk.util.FormattedLog;
 
-public class AppResources {
-    private static final Logger LOG = Logger.getLogger(AppResources.class.getName());
-
-    private ResTable table;
+public class AppResources implements Dumpable {
+    private static final FormattedLog LOG = new FormattedLog(AppResources.class);
+    private ResStringPool stringPool;
+    private List<ResTablePackage> packages = new ArrayList<ResTablePackage>();
 
     public AppResources(File file) throws IOException {
         FileInputStream in = null;
         try {
             in = new FileInputStream(file);
-            MappedByteBuffer buf = in.getChannel().map(MapMode.READ_ONLY, 0, file.length());
-            buf.order(ByteOrder.LITTLE_ENDIAN);
-
-            table = (ResTable) parseChunk(buf);
-            table.dump(System.out, "");
+            MappedByteBuffer bb = in.getChannel().map(MapMode.READ_ONLY, 0, file.length());
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            parse(bb);
         } finally {
             IO.close(in);
         }
@@ -41,84 +42,62 @@ public class AppResources {
         }
         ByteBuffer bb = ByteBuffer.wrap(buf);
         bb.order(ByteOrder.LITTLE_ENDIAN);
-
-        table = (ResTable) parseChunk(bb);
-        table.dump(System.out, "");
+        parse(bb);
     }
 
-    public static Res parseChunk(ByteBuffer buf, Res... parents) throws ParseException {
-        // Read Chunk Header
-        short typeId = buf.getShort();
-        ChunkType type = ChunkType.fromId(typeId);
-        if (type == null) {
-            throw new ParseException(String.format("Unrecognized type: 0x%04X", typeId));
+    /**
+     * Parse the entire resources content
+     * 
+     * @param buf
+     *            the resources buffer
+     * @throws ParseException
+     */
+    private void parse(ByteBuffer buf) throws ParseException {
+        Chunk mainChunk = new Chunk(buf);
+        // expect Table type
+        if (mainChunk.type != Chunk.Type.TABLE) {
+            throw new ParseException(String.format("Unexpected chunk type: 0x%04X (expected %s:0x%04X)",
+                    mainChunk.typeId, mainChunk.type.name(), mainChunk.type.getId()));
         }
-        short headerSize = buf.getShort();
-        int dataSize = buf.getInt();
 
-        debug("pos: 0x%08X", buf.position());
-        debug("Chunk: %s - header:%d - data:%d", type, headerSize, dataSize);
+        // package count
+        int packageCount = buf.getInt();
+        int actualPackageCount = 0;
 
-        // Create Type
-        Res res = newType(type);
-        debug("New Type - %s", res.getClass().getName());
-
-        int pos, size, end;
-
-        // Parse Type Headers
-        pos = buf.position();
-        size = headerSize - 8;
-        end = pos + size;
-
-        debug("Parse Header - %s: (%s)", res.getClass().getName(), buf);
-        res.parseHeader(buf);
-        for (Res parent : parents) {
-            if (buf.hasRemaining()) {
-                debug("Parse Header - %s: (%s)", parent.getClass().getName(), buf);
-                parent.parseHeader(buf);
+        while (buf.hasRemaining()) {
+            Chunk chunk = new Chunk(buf);
+            LOG.debug("[0x%04X] Chunk - %s", chunk.location, chunk.type);
+            switch (chunk.type) {
+            case STRING_POOL:
+                stringPool = new ResStringPool();
+                stringPool.parse(chunk, buf);
+                break;
+            case TABLE_PACKAGE:
+                actualPackageCount++;
+                ResTablePackage pkg = new ResTablePackage();
+                pkg.parse(chunk, buf);
+                packages.add(pkg);
+                break;
+            default:
+                break;
             }
+            // skip to next chunk start location
+            chunk.setPositionAfter(buf);
         }
-        buf.position(pos + size);
 
-        // Parse Type Data
-        pos = buf.position();
-        size = dataSize - headerSize;
-        end = pos + size;
-
-        debug("Parse Data - %s: (%s)", res.getClass().getName(), buf);
-        res.parseData(buf);
-        for (Res parent : parents) {
-            if (buf.hasRemaining()) {
-                debug("Parse Data - %s: (%s)", parent.getClass().getName(), buf);
-                parent.parseData(buf);
-            }
-        }
-        buf.position(pos + size);
-        return res;
-    }
-
-    public static Res newType(ChunkType type) throws ParseException {
-        switch (type) {
-        case TABLE:
-            return new ResTable();
-        case STRING_POOL:
-            return new ResStringPool();
-        default:
-            throw new ParseException(type + " Not yet implemented");
+        if (actualPackageCount != packageCount) {
+            throw new ParseException("Package count mismatch: expected " + packageCount + ", but only found "
+                    + actualPackageCount);
         }
     }
 
-    private static void debug(String format, Object... args) {
-        if (LOG.isLoggable(Level.FINE)) {
-            LOG.fine(String.format(format, args));
+    public void dump(PrintStream out, String indent) {
+        out.printf("AppResources%n");
+        if (stringPool != null) {
+            stringPool.dump(out, indent + "  ");
         }
-    }
-
-    public ResTable getTable() {
-        return table;
-    }
-
-    private static void warn(String format, Object... args) {
-        LOG.warning(String.format(format, args));
+        for (ResTablePackage pkg : packages) {
+            pkg.dump(out, indent + "  ");
+        }
     }
 }

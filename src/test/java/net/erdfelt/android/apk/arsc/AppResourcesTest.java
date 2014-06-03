@@ -18,6 +18,7 @@ public class AppResourcesTest {
     public void testLoadABI() throws IOException {
         File file = MavenTestingUtils.getTestResourceFile("abi-resources.arsc");
         AppResources arsc = new AppResources(file);
+        arsc.dump(System.out, "");
     }
     
     @Test

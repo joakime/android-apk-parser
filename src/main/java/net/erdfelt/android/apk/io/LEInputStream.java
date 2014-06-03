@@ -3,14 +3,11 @@ package net.erdfelt.android.apk.io;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 
 /**
  * Input Stream for dealing with Little Endian values.
  */
 public class LEInputStream extends FilterInputStream {
-    private static final Charset UTF8 = Charset.forName("UTF-8");
-    
     public LEInputStream(InputStream in) {
         super(in);
     }
@@ -122,9 +119,9 @@ public class LEInputStream extends FilterInputStream {
         for (int i = 0; i < length; i++) {
             buf[i] = (byte) read();
             if(buf[i] == 0x00) {
-                return new String(buf,0,i,UTF8);
+                return new String(buf,0,i,BufUtil.UTF8);
             }
         }
-        return new String(buf,0,length,UTF8);
+        return new String(buf,0,length,BufUtil.UTF8);
     }
 }

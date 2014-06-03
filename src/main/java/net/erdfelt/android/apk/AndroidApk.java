@@ -5,19 +5,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 
 import net.erdfelt.android.apk.io.IO;
+import net.erdfelt.android.apk.util.FormattedLog;
 import net.erdfelt.android.apk.xml.Attribute;
 import net.erdfelt.android.apk.xml.BinaryXmlListener;
 import net.erdfelt.android.apk.xml.BinaryXmlParser;
 
 public class AndroidApk {
-    private static final Logger LOG = Logger.getLogger(AndroidApk.class.getName());
+    private static final FormattedLog LOG = new FormattedLog(AndroidApk.class);
     
     private String appVersion;
     private String appVersionCode;
@@ -87,7 +86,7 @@ public class AndroidApk {
             while (((ze = zis.getNextEntry()) != null))
             {
                 String name = ze.getName();
-                debug("Entry: %s",name);
+                LOG.debug("Entry: %s",name);
                 if(name.equalsIgnoreCase("AndroidManifest.xml"))
                 {
                     foundManifest = true;
@@ -103,12 +102,6 @@ public class AndroidApk {
             }
         } finally {
             IO.close(zis);
-        }
-    }
-
-    private void debug(String format, Object ... args) {
-        if (LOG.isLoggable(Level.FINE)) {
-            LOG.fine(String.format(format, args));
         }
     }
 

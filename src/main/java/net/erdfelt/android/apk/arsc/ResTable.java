@@ -8,20 +8,18 @@ import java.util.List;
 import net.erdfelt.android.apk.io.ParseException;
 import net.erdfelt.android.apk.util.Dumpable;
 
-public class ResTable implements Res, Dumpable {
+public class ResTable implements Dumpable {
     // header fields
     private int packageCount;
 
     private List<ResTablePackage> packages = new ArrayList<ResTablePackage>();
 
-    public void parseHeader(ByteBuffer buf) throws ParseException {
+    public void parse(Chunk chunk, ByteBuffer buf) throws ParseException {
         packageCount = buf.getInt();
-    }
 
-    public void parseData(ByteBuffer buf) throws ParseException {
         for (int i = 0; i < packageCount; i++) {
             ResTablePackage pkg = new ResTablePackage();
-            pkg.parse(buf);
+            pkg.parse(chunk, buf);
             packages.add(pkg);
         }
     }
