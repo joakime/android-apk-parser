@@ -1,6 +1,8 @@
 Android APK Parsing Lib
 =======================
 
+[![Circle CI](https://circleci.com/gh/joakime/android-apk-parser.svg?style=svg)](https://circleci.com/gh/joakime/android-apk-parser)
+
 Simple class to read/parse the packageName, versionName, versionCode
 information, and more out of a compiled Android APK file.
 
